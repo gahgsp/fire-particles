@@ -9,7 +9,7 @@ using namespace std;
 
 namespace gah {
 
-    Window::Window() : window(NULL), renderer(NULL), texture(NULL), buffer(NULL) {}
+    Window::Window() : window(NULL), renderer(NULL), texture(NULL), buffer(NULL), blur_buffer(NULL) {}
 
     bool Window::init() {
 
@@ -59,9 +59,11 @@ namespace gah {
 
         // This buffer represents all the pixels in the screen
         buffer = new Uint32[SCREEN_WIDTH * SCREEN_HEIGHT];
+        blur_buffer = new Uint32[SCREEN_WIDTH * SCREEN_HEIGHT];
 
         // Set a value in a memory block
         memset(buffer, 0, SCREEN_WIDTH * SCREEN_HEIGHT * sizeof(Uint32));
+        memset(blur_buffer, 0, SCREEN_WIDTH * SCREEN_HEIGHT * sizeof(Uint32));
 
         return true;
     }
@@ -85,7 +87,7 @@ namespace gah {
         Uint32 color = 0;
 
         color += red;
-        color <<= 8; // shifts the byte
+        color <<= 8; // shifts the bits
         color += green;
         color <<= 8;
         color += blue;
@@ -97,7 +99,7 @@ namespace gah {
 
     bool Window::handleEvents() {
         SDL_Event event;
-        while (SDL_PollEvent(&event)) { // listen for SDl events
+        while (SDL_PollEvent(&event)) { // listen for SDL events
             if (event.type == SDL_QUIT) {
                 return false;
             }
@@ -105,8 +107,52 @@ namespace gah {
         return true;
     }
 
-    void Window::clear() {
-        memset(buffer, 0, SCREEN_WIDTH * SCREEN_HEIGHT * sizeof(Uint32));
+    void Window::blur() {
+        // Swap the buffers
+        Uint32 *temp_buffer = buffer;
+        buffer = blur_buffer;
+        blur_buffer = temp_buffer;
+
+        // Iterate through all the pixels in the screen
+        for (int y = 0; y < SCREEN_HEIGHT; y++) {
+            for (int x = 0; x < SCREEN_WIDTH; x++) {
+                int red_total = 0;
+                int green_total = 0;
+                int blue_total = 0;
+                /*
+                 * 0 0 0
+                 * 0 1 0
+                 * 0 0 0
+                 *
+                 * We need to get the pixel located at 1 and make the adjacent
+                 * pixels located at 0 have the average color of pixel 1
+                 */
+                for (int row = -1; row <= 1; row++) {
+                    for (int col = -1; col <= 1; col++) {
+                        int current_x = x + col;
+                        int current_y = y + row;
+
+                        if (current_x >= 0 && current_x < SCREEN_WIDTH &&
+                            current_y >= 0 && current_y < SCREEN_HEIGHT) {
+                            Uint32 color = blur_buffer[current_y * SCREEN_WIDTH + current_x];
+                            Uint8 red = color >> 24;
+                            Uint8 green = color >> 16;
+                            Uint8 blue = color >> 8;
+
+                            red_total += red;
+                            green_total += green;
+                            blue_total += blue;
+                        }
+                    }
+                }
+
+                Uint8 red = red_total / 9;
+                Uint8 green = green_total / 9;
+                Uint8 blue = blue_total / 9;
+
+                setPixel(x, y, red, green, blue);
+            }
+        }
     }
 
     void Window::close() {

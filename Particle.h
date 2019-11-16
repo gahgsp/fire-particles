@@ -18,6 +18,8 @@ namespace gah {
         virtual ~Particle();
 
         void update(int interval);
+    private:
+        void init();
     };
 }
 

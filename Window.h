@@ -17,6 +17,7 @@ namespace gah {
         SDL_Renderer *renderer;
         SDL_Texture *texture;
         Uint32 *buffer;
+        Uint32 *blur_buffer;
     public:
         Window();
 
@@ -28,7 +29,7 @@ namespace gah {
 
         bool handleEvents();
 
-        void clear();
+        void blur();
 
         void close();
     };
