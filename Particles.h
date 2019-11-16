@@ -18,10 +18,11 @@ namespace gah {
 
         const Particle *const getParticles() { return pParticles; };
 
-        void update();
+        void update(int elapsed_time);
 
     private:
         Particle *pParticles;
+        int last_updated;
     };
 }
 

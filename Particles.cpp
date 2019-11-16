@@ -5,7 +5,7 @@
 #include "Particles.h"
 
 namespace gah {
-    Particles::Particles() {
+    Particles::Particles(): last_updated(0) {
         pParticles = new Particle[PARTICLES_NUMBER];
     }
 
@@ -13,9 +13,13 @@ namespace gah {
         delete[] pParticles;
     }
 
-    void Particles::update() {
+    void Particles::update(int elapsed_time) {
+        int interval = elapsed_time - last_updated;
+
         for (int i = 0; i < PARTICLES_NUMBER; i++) {
-            pParticles[i].update();
+            pParticles[i].update(interval);
         }
+
+        last_updated = elapsed_time;
     }
 }

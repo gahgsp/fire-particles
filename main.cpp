@@ -32,7 +32,7 @@ int main() {
         int elapsed_time = SDL_GetTicks();
 
         window.clear();
-        particles.update();
+        particles.update(elapsed_time);
 
         unsigned char red = (unsigned char) ((1 + sin(elapsed_time * 0.0001)) * 128);
         unsigned char green = (unsigned char) ((1 + sin(elapsed_time * 0.0002)) * 128);
