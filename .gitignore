@@ -1,0 +1,6 @@
+# Don't track the content of these folders
+.idea
+cmake-build-debug
+
+# Don't track these files
+*.txt
