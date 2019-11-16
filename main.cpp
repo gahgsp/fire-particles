@@ -3,13 +3,20 @@
 //
 
 #include <iostream>
+#include <math.h>
+#include <stdlib.h>
+#include <time.h>
 #include <SDL2/SDL.h>
+
 #include "Window.h"
+#include "Particles.h"
 
 using namespace std;
 using namespace gah;
 
 int main() {
+
+    srand(time(NULL));
 
     Window window;
 
@@ -17,17 +24,32 @@ int main() {
         cout << "Error initializing SDL" << endl;
     }
 
-    while(true) {
+    Particles particles;
+
+    while (true) {
         // Update the particles
 
-        // Draw the particles
-        for (int y = 0; y < Window::SCREEN_HEIGHT; y++) {
-            for (int x = 0; x < Window::SCREEN_WIDTH; x++) {
-                window.setPixel(x, y, 128, 0, 255);
-            }
+        int elapsed_time = SDL_GetTicks();
+
+        window.clear();
+        particles.update();
+
+        unsigned char red = (unsigned char) ((1 + sin(elapsed_time * 0.0001)) * 128);
+        unsigned char green = (unsigned char) ((1 + sin(elapsed_time * 0.0002)) * 128);
+        unsigned char blue = (unsigned char) ((1 + sin(elapsed_time * 0.0003)) * 128);
+
+        // Create the particles
+        const Particle *const pParticles = particles.getParticles();
+        for (int i = 0; i < Particles::PARTICLES_NUMBER; i++) {
+            Particle particle = pParticles[i];
+
+            int x = (particle.x + 1) * (Window::SCREEN_WIDTH / 2);
+            int y = particle.y * (Window::SCREEN_WIDTH / 2) + (Window::SCREEN_HEIGHT / 2);
+
+            window.setPixel(x, y, red, green, blue);
         }
 
-        // Redraw the screen
+        // Draw the screen
         window.update();
 
         // Check for events
